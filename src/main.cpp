@@ -40,7 +40,6 @@ int main() {
 		"void main()\n"
 		"{\n"
 		"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-		"	vertexColor = vec4(aPos.x,aPos.y,aPos.z,1.0);\n"
 		"}\0";
 
 	unsigned int vertexShader;
@@ -63,7 +62,7 @@ int main() {
 
 	const char* fragmentShaderSource = "#version 330 core\n"
 		"out vec4 FragColor;\n"
-		"in vec4 vertexColor;\n"
+		"uniform vec4 vertexColor;\n"
 		"void main()\n"
 		"{\n"
 		"	FragColor = vertexColor;\n"
@@ -286,8 +285,21 @@ int main() {
 		glClearColor(0.1f, 0.1f, 0.4f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+
+		//Change color dynamically
+		float timeValue = glfwGetTime();
+		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+		int vertexColorLocaiton = glGetUniformLocation(shaderProgram, "vertexColor");
+
+		
+
+
+
 		//Render the object
 		glUseProgram(shaderProgram);
+		// Set the vertex color using uniform
+		glUniform4f(vertexColorLocaiton, 0.0f, greenValue, 0.0f, 1.0f);
+
 		glBindVertexArray(VAO1);
 		// type, start, no of vertices
 		glDrawArrays(GL_TRIANGLES, 0, 3);
