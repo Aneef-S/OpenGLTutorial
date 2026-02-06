@@ -8,7 +8,6 @@
 
 std::string readFileToString(const std::string& path);
 
-
 Shader::Shader(const char *vertexShaderFilePath, const char *fragmentShaderFilePath)
 {
     std::string vertexShaderSource = readFileToString(vertexShaderFilePath);
@@ -54,18 +53,18 @@ Shader::Shader(const char *vertexShaderFilePath, const char *fragmentShaderFileP
     }
 
     //Creating and compiling shader program
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram,vertexShader);
-    glAttachShader(shaderProgram,fragmentShader);
-    glLinkProgram(shaderProgram);
+    shaderProgramID = glCreateProgram();
+    glAttachShader(shaderProgramID,vertexShader);
+    glAttachShader(shaderProgramID,fragmentShader);
+    glLinkProgram(shaderProgramID);
 
     success = 0;
     infoLog[0]='\0';
 
-    glGetProgramiv(shaderProgram,GL_LINK_STATUS,&success);
+    glGetProgramiv(shaderProgramID,GL_LINK_STATUS,&success);
     if (!success)
 	{
-		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+		glGetProgramInfoLog(shaderProgramID, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
 		
 	}
@@ -76,9 +75,33 @@ Shader::Shader(const char *vertexShaderFilePath, const char *fragmentShaderFileP
 
 }
 
+void Shader::SetBool(const std::string &boolName, bool value) const
+{
+    glUniform1i(
+        glGetUniformLocation(shaderProgramID,boolName.c_str()),
+        int(value)
+    );
+}
+
+void Shader::SetInt(const std::string &intName, int value) const
+{
+    glUniform1i(
+        glGetUniformLocation(shaderProgramID,intName.c_str()),
+        value
+    );
+}
+
+void Shader::SetFloat(const std::string &floatName, float value) const
+{
+    glUniform1f(
+        glGetUniformLocation(shaderProgramID,floatName.c_str()),
+        value
+    );
+}
+
 void Shader::Use()
 {
-    glUseProgram(shaderProgram);
+    glUseProgram(shaderProgramID);
 }
 
 std::string readFileToString(const std::string& path)

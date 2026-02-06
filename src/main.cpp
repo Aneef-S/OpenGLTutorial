@@ -2,7 +2,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <Shader.h>
+#include "Shader.h"
+#include "glad_d.h"
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -41,6 +42,7 @@ int main() {
 	const char* fragmentShaderPath = "Shaders/fragmentShader.glsl";
 
 	Shader shader = Shader(vertexShaderPath,fragmentShaderPath);
+	
 
 
 	//------------------ Set up vertex data and buffers and configure vertex attributes ------------------//
@@ -69,14 +71,14 @@ int main() {
 	//Generate Vertex Array Object ID
 	glGenVertexArrays(1, &VAO);
 	//Generate buffer ID
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
+	glGenBuffers_d(1, &VBO);
+	glGenBuffers_d(1, &EBO);
 	//Bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
 	glBindVertexArray(VAO);
 
 
 	//Gl_array_Buffer is for vertex attributes
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindBuffer_d(GL_ARRAY_BUFFER, VBO);
 	//Copy vertices data to buffer's memory
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
