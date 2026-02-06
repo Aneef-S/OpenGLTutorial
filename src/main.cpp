@@ -4,21 +4,24 @@
 
 #include "Shader.h"
 #include "glad_d.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+void processInput(GLFWwindow *window);
+unsigned int GetTextureFromImage(const std::string &imagePath);
 
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow* window);
+int main()
+{
 
-int main() {
-
-   
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-	GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
+	GLFWwindow *window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -35,128 +38,160 @@ int main() {
 
 	glViewport(0, 0, 800, 600);
 
-
 	//-----------------------------------Shader Compilation---------------------------------------------//
 
-	const char* vertexShaderPath = "Shaders/vertexShader.glsl";
-	const char* fragmentShaderPath = "Shaders/fragmentShader.glsl";
+	const char *vertexShaderPath = "Shaders/vertexShader.glsl";
+	const char *fragmentShaderPath = "Shaders/fragmentShader.glsl";
 
-	Shader shader = Shader(vertexShaderPath,fragmentShaderPath);
+	Shader shader = Shader(vertexShaderPath, fragmentShaderPath);
+
+	// Textures
+
+	const char *textureImagePath = "Resources/container.jpg";
+	unsigned int containerTextureID = GetTextureFromImage(textureImagePath);
+	unsigned int smilyTextureID = GetTextureFromImage("Resources/awesomeface.png");
 	
-
+	
 
 	//------------------ Set up vertex data and buffers and configure vertex attributes ------------------//
-	
 
-	//Components
-	float vertices[] =
-	{
-		 0.5f,  0.5f, 0.0f, 
-		  0.5f, -0.5f, 0.0f,
-		  -0.5f,  0.5f, 0.0f,
-		 0.5f, -0.5f, 0.0f,  // bottom right
-		-0.5f, -0.5f, 0.0f,  // bottom left
-		-0.5f,  0.5f, 0.0f   // top left 
+	// Components
+	float vertices[] = {
+			// positions          // colors           // texture coords
+			0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,		// top right
+			0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,	// bottom right
+			-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+			-0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f		// top left
 	};
 
-	//For Element Buffer Object, stores the indices of the vertices rather than the vertices themselves
-	unsigned int indices[] =
-	{
-		0, 1, 3, // First Triangle
-		1,2,3 // Second Triangle
-	};
+	unsigned int indices[] = {
+			0, 1, 2,
+			0, 3, 2
+		};
 
-	//Vertex Buffer Object
-	unsigned int VBO,VAO,EBO;
-	//Generate Vertex Array Object ID
+	// Vertex Buffer Object
+	unsigned int VBO, VAO, EBO;
+
+	// Generate Vertex Array Object ID
 	glGenVertexArrays(1, &VAO);
-	//Generate buffer ID
-	glGenBuffers_d(1, &VBO);
-	glGenBuffers_d(1, &EBO);
-	//Bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+	// Generate buffer ID
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
+
+	// Bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
 	glBindVertexArray(VAO);
 
-
-	//Gl_array_Buffer is for vertex attributes
-	glBindBuffer_d(GL_ARRAY_BUFFER, VBO);
-	//Copy vertices data to buffer's memory
+	// Gl_array_Buffer is for vertex attributes
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	// Copy vertices data to buffer's memory
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	//Element Buffer Object
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	//Copy indices data to buffer's memory
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	
-
-
-	//Specify how OpenGL should interpret the vertex data
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	//Enable the vertex attribute at location 0
-	glEnableVertexAttribArray(0);
-	
-
-
-	unsigned int VBO1, VAO1;
-
-	glGenVertexArrays(1, &VAO1);
-	glGenBuffers(1, &VBO1);
-
-	glBindVertexArray(VAO1);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO1);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,3* sizeof(float), (void*)0);
+	// Specify how OpenGL should interpret the vertex data
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
 	glEnableVertexAttribArray(0);
 
+	// Setting color
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
 
+	// Setting texture coordinates.
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
 
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glEnable(GL_DEPTH_TEST);
 
-
-
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);	
+	shader.Use();
+	shader.SetInt("containerTexture", 0);
+	shader.SetInt("smilyTexture",1);
 
 	while (!glfwWindowShouldClose(window))
-	{ 
+	{
 		// input
 		processInput(window);
 
 		//------------------ render------------------//
-		//Clear the colorbuffer
+		// Clear the colorbuffer
 		glClearColor(0.1f, 0.1f, 0.4f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//Render the object
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, containerTextureID);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D,smilyTextureID);
+
 		shader.Use();
-		glBindVertexArray(VAO1);
-		// type, start, no of vertices
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-		glBindVertexArray(0);
-
-		//glUseProgram(shaderProgramYellow);
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 3, 3);
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		glBindVertexArray(0);
-
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		// glBindVertexArray(0);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
 	glfwTerminate();
 
-    
 	return 0;
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
 	glViewport(0, 0, width, height);
 }
 
-void processInput(GLFWwindow* window)
+void processInput(GLFWwindow *window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
+}
+
+unsigned int GetTextureFromImage(const std::string &imagePath)
+{
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);	
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	stbi_set_flip_vertically_on_load(true);
+
+	int width, height, nrChannles;
+	unsigned char *textureData = stbi_load(imagePath.c_str(), &width, &height, &nrChannles, 0);
+
+	if (textureData)
+	{
+		GLenum format;
+		if (nrChannles == 1) format = GL_RED;
+		else if (nrChannles == 3) format = GL_RGB;
+		else if (nrChannles == 4) format = GL_RGBA;
+
+		glTexImage2D(
+			GL_TEXTURE_2D,
+			0, 
+			format, 
+			width, 
+			height, 
+			0, 
+			format, 
+			GL_UNSIGNED_BYTE, 
+			textureData);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+
+	stbi_image_free(textureData);
+	return textureID;
 }

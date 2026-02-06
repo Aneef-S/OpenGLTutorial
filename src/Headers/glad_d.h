@@ -25,3 +25,13 @@ void glBindBuffer_d(GLenum target,GLuint buffer)
 {
   glBindBuffer(target,buffer);
 }
+
+/// @brief The function gIBufferData allocates memory and stores data within the initialized memory in the currently bound buffer object. One of many functions to add/edit the buffer of a buffer object
+/// @param mode Specifies the target buffer object of which the most common are GL_ARRAY_BUFFER and GL_ELEMENT_ARRAY_BUFFER.
+/// @param size Specifies the size in bytes of the buffer object's new data.
+/// @param data Specifies a pointer to data that will be copied into the buffer, or NULL if no data is to be copied (leaves allocted memory empty)
+/// @param usage usage: Specifies the expected usage pattern of the data. Most common are GL_STATIC_DRAW,GL_DYNAMIC_DRAW and GL_STREAM_DRAW.
+void glBufferData_d(GLenum mode,GLsizeiptr size,const GLvoid* data,GLenum usage)
+{
+  glBufferData(mode,size,data,usage);
+}
