@@ -244,10 +244,37 @@ int main()
 	glm::vec3 lightDiffuse = glm::vec3(0.5f, 0.5f, 0.5f);
 	glm::vec3 lightSpecular = glm::vec3(1.0f, 1.0f, 1.0f);
 
+	const glm::vec3 cubePositions[10] = {
+		glm::vec3(0.0f,  0.0f,  0.0f),
+		glm::vec3(2.0f,  5.0f, -15.0f),
+		glm::vec3(-1.5f, -2.2f, -2.5f),
+		glm::vec3(-3.8f, -2.0f, -12.3f),
+		glm::vec3(2.4f, -0.4f, -3.5f),
+		glm::vec3(-1.7f,  3.0f, -7.5f),
+		glm::vec3(1.3f, -2.0f, -2.5f),
+		glm::vec3(1.5f,  2.0f, -2.5f),
+		glm::vec3(1.5f,  0.2f, -1.5f),
+		glm::vec3(-1.3f,  1.0f, -1.5f)
+	};
 
 	shaderProgram.use();
 	shaderProgram.setInt("material.diffuse", 0);
 	shaderProgram.setInt("material.specular", 1);
+
+	shaderProgram.setFloat("material.shininess", shininess);
+
+	shaderProgram.setVec3f("light.ambient", lightAmbient);
+	shaderProgram.setVec3f("light.diffuse", lightDiffuse);
+	shaderProgram.setVec3f("light.specular", lightSpecular);
+
+
+
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, diffuseMap);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, specularMap);
 	
 
 	while (!glfwWindowShouldClose(window))
@@ -277,40 +304,35 @@ int main()
 		shaderProgram.use();
 
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0, 0.0f));
 	
 
-		shaderProgram.setMat4f("model", model);
-		shaderProgram.setMat4f("view", view);
-		shaderProgram.setMat4f("projection", projection);
+
+
+		for (unsigned int i = 0; i < 10; i++)
+		{
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, cubePositions[i]);
+
+			model = glm::rotate(model,glm::radians(i * 20.0f),glm::vec3(1.0f,3.0f,.5f));
+
+			shaderProgram.setMat4f("model", model);
+			shaderProgram.setMat4f("view", view);
+			shaderProgram.setMat4f("projection", projection);
+			shaderProgram.setVec3f("light.lightPosition", lightPos);
+
+			shaderProgram.setVec3f("viewPos", camera.cameraPosition);
+
+			glBindVertexArray(cube_VAO);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+			glBindVertexArray(0);
+
+
+
+		}
+
 
 		
-		shaderProgram.setVec3f("viewPos", camera.cameraPosition);
-
 		
-		
-		shaderProgram.setFloat("material.shininess", shininess);
-
-		shaderProgram.setVec3f("light.ambient", lightAmbient);
-		shaderProgram.setVec3f("light.diffuse", lightDiffuse);
-		shaderProgram.setVec3f("light.specular", lightSpecular);
-		shaderProgram.setVec3f("light.lightPosition", lightPos);
-		
-
-		
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, diffuseMap);
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, specularMap);
-
-
-
-		
-		glBindVertexArray(cube_VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glBindVertexArray(0);
-
 
 
 		lightShaderProgram.use();
@@ -320,6 +342,8 @@ int main()
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, lightPos);
 
+		
+
 		lightShaderProgram.setMat4f("model", model);
 		lightShaderProgram.setMat4f("view", view);
 		lightShaderProgram.setMat4f("projection", projection);
@@ -328,6 +352,8 @@ int main()
 		glBindVertexArray(cube_VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
+
+		
 
 
 
