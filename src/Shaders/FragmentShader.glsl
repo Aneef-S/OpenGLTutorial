@@ -2,10 +2,11 @@
 
 struct Material
 {
-
+	sampler2D emission;
 	sampler2D diffuse;
 	sampler2D specular;
 	float shininess;
+	float emissionStrength;
 
 };
 
@@ -15,6 +16,7 @@ struct Light
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
+	vec4 color;
 };
 
 
@@ -40,7 +42,7 @@ void main()
 {
 	// Ambient Color
 	vec3 ambient = light.ambient * texture( material.diffuse,TexCoord).rgb;
-
+	vec3 emission = texture(material.emission,TexCoord*1.5f).rgb * material.emissionStrength;
 
 	
 	
@@ -49,7 +51,7 @@ void main()
 	vec3 lightDir = normalize(light.lightPosition - FragmentPosition);
 
 	float diff = max(dot(norm, lightDir), 0.0);
-	vec3 diffuse = light.diffuse * diff * texture(material.diffuse,TexCoord).rgb;
+	vec3 diffuse = light.diffuse * diff * texture(material.diffuse,TexCoord).rgb * light.color.rgb ;
 
 	// Specular Color
 
@@ -57,9 +59,9 @@ void main()
 	vec3 reflectDir = reflect(-lightDir, norm);
 
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-	vec3 specular = light.specular * spec * texture(material.specular,TexCoord).rgb;
+	vec3 specular = light.specular * spec * texture(material.specular,TexCoord).rgb ;
 
 
-	vec4 resultColor = vec4((ambient + diffuse + specular),1.0f) ;
+	vec4 resultColor = vec4((ambient + diffuse + specular + emission) ,1.0f) ;
 	FragmentColor =   resultColor ;
 }

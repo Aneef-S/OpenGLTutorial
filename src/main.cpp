@@ -69,6 +69,7 @@ int main()
 
 	unsigned int diffuseMap = loadTexture("resources/textures/container2.png");
 	unsigned int specularMap = loadTexture("resources/textures/container2_specular.png");
+	unsigned int emissionMap = loadTexture("resources/textures/emission.jpg");
 	
 
 	stbi_set_flip_vertically_on_load(true);
@@ -260,14 +261,15 @@ int main()
 	shaderProgram.use();
 	shaderProgram.setInt("material.diffuse", 0);
 	shaderProgram.setInt("material.specular", 1);
+	shaderProgram.setInt("material.emission", 2);
 
 	shaderProgram.setFloat("material.shininess", shininess);
-
+	shaderProgram.setFloat("material.emissionStrength", 0.4f);
 	shaderProgram.setVec3f("light.ambient", lightAmbient);
 	shaderProgram.setVec3f("light.diffuse", lightDiffuse);
 	shaderProgram.setVec3f("light.specular", lightSpecular);
 
-
+	glm::vec3 lightPos = glm::vec3(0.0f,0.0f,-2.0f);
 
 
 	glActiveTexture(GL_TEXTURE0);
@@ -275,6 +277,9 @@ int main()
 
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, specularMap);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, emissionMap);
 	
 
 	while (!glfwWindowShouldClose(window))
@@ -295,9 +300,9 @@ int main()
 		view = camera.GetView();
 		projection = camera.GetProjection();
 
-		const float radius = 4.0f;
-		glm::vec3 lightPos = glm::vec3(glm::sin(currentFrame) * radius, glm::sin(currentFrame / 2) * radius, glm::cos(currentFrame) * radius);
-
+		
+		
+		lightColor = glm::vec4(glm::sin(currentFrame) * 0.5f + 0.5f, glm::sin(currentFrame / 2) * 0.5f + 0.5f, glm::cos(currentFrame) * 0.5f + 0.5f, 1.0f);
 		
 
 	
@@ -319,8 +324,9 @@ int main()
 			shaderProgram.setMat4f("view", view);
 			shaderProgram.setMat4f("projection", projection);
 			shaderProgram.setVec3f("light.lightPosition", lightPos);
-
+			shaderProgram.setVec4f("light.color", lightColor);
 			shaderProgram.setVec3f("viewPos", camera.cameraPosition);
+			shaderProgram.setFloat("material.emissionStrength", abs(sin(currentFrame))*0.4f);
 
 			glBindVertexArray(cube_VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -342,6 +348,7 @@ int main()
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, lightPos);
 
+		
 		
 
 		lightShaderProgram.setMat4f("model", model);
