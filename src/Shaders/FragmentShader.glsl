@@ -9,10 +9,11 @@ struct Material
 	float emissionStrength;
 
 };
-
+//For directional light
 struct Light
 {
-	vec3 lightPosition;
+	//vec3 lightPosition;
+	vec3 direction;
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
@@ -48,10 +49,10 @@ void main()
 	
 	// Diffuse Color
 	vec3 norm = normalize(Normal);
-	vec3 lightDir = normalize(light.lightPosition - FragmentPosition);
+	vec3 lightDir = -normalize(light.direction);
 
 	float diff = max(dot(norm, lightDir), 0.0);
-	vec3 diffuse = light.diffuse * diff * texture(material.diffuse,TexCoord).rgb * light.color.rgb ;
+	vec3 diffuse = light.diffuse * diff * texture(material.diffuse,TexCoord).rgb ;
 
 	// Specular Color
 

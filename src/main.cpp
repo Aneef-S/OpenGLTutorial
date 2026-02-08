@@ -269,7 +269,7 @@ int main()
 	shaderProgram.setVec3f("light.diffuse", lightDiffuse);
 	shaderProgram.setVec3f("light.specular", lightSpecular);
 
-	glm::vec3 lightPos = glm::vec3(0.0f,0.0f,-2.0f);
+	glm::vec3 lightDirection = glm::vec3(0.0f,-1.0f,0.0f);
 
 
 	glActiveTexture(GL_TEXTURE0);
@@ -323,10 +323,10 @@ int main()
 			shaderProgram.setMat4f("model", model);
 			shaderProgram.setMat4f("view", view);
 			shaderProgram.setMat4f("projection", projection);
-			shaderProgram.setVec3f("light.lightPosition", lightPos);
+			shaderProgram.setVec3f("light.direction", lightDirection);
 			shaderProgram.setVec4f("light.color", lightColor);
 			shaderProgram.setVec3f("viewPos", camera.cameraPosition);
-			shaderProgram.setFloat("material.emissionStrength", abs(sin(currentFrame))*0.4f);
+			shaderProgram.setFloat("material.emissionStrength", 0);
 
 			glBindVertexArray(cube_VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -346,7 +346,7 @@ int main()
 		
 
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, lightPos);
+		model = glm::translate(model, lightDirection);
 
 		
 		
