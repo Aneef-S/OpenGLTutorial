@@ -225,7 +225,7 @@ int main()
 	glfwGetCursorPos(window, &startX, &startY);
 	//camera.SetLastPosition(startX, startY);
 
-	float lastFrame = 0.0f;
+	float lastTime = 0.0f;
 	float deltaTime = 0.0f;
 
 	glm::vec4 lightColor = glm::vec4(0.8f, 0.8f, 0.7f, 1.0f);
@@ -268,8 +268,11 @@ int main()
 	shaderProgram.setVec3f("light.ambient", lightAmbient);
 	shaderProgram.setVec3f("light.diffuse", lightDiffuse);
 	shaderProgram.setVec3f("light.specular", lightSpecular);
+	shaderProgram.setFloat("light.attenuationConstant", 1.0f);
+	shaderProgram.setFloat("light.attenuationConstantLinear", 0.09f);
+	shaderProgram.setFloat("light.attenuationConsantQuadartic", 0.032f);
 
-	glm::vec3 lightDirection = glm::vec3(0.0f,-1.0f,0.0f);
+	glm::vec3 lightPosition = glm::vec3(0.0f,0.0f,-2.0f);
 
 
 	glActiveTexture(GL_TEXTURE0);
@@ -285,9 +288,9 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 
-		float currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
+		float currentTime = glfwGetTime();
+		deltaTime = currentTime - lastTime;
+		lastTime = currentTime;
 
 		processInput(window);
 		camera.HandleInput(window,deltaTime);
@@ -302,7 +305,7 @@ int main()
 
 		
 		
-		lightColor = glm::vec4(glm::sin(currentFrame) * 0.5f + 0.5f, glm::sin(currentFrame / 2) * 0.5f + 0.5f, glm::cos(currentFrame) * 0.5f + 0.5f, 1.0f);
+		lightColor = glm::vec4(abs(sin(currentTime)));
 		
 
 	
@@ -323,7 +326,7 @@ int main()
 			shaderProgram.setMat4f("model", model);
 			shaderProgram.setMat4f("view", view);
 			shaderProgram.setMat4f("projection", projection);
-			shaderProgram.setVec3f("light.direction", lightDirection);
+			shaderProgram.setVec3f("light.position", lightPosition);
 			shaderProgram.setVec4f("light.color", lightColor);
 			shaderProgram.setVec3f("viewPos", camera.cameraPosition);
 			shaderProgram.setFloat("material.emissionStrength", 0);
@@ -346,7 +349,7 @@ int main()
 		
 
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, lightDirection);
+		model = glm::translate(model,lightPosition);
 
 		
 		
