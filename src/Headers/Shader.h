@@ -1,4 +1,7 @@
 
+#ifndef SHADER_H
+#define SHADER_H
+
 #include <glm/gtc/type_ptr.hpp>
 
 class Shader
@@ -35,3 +38,4 @@ class Shader
     /// @brief User the Shader
     void Use();
 };
+#endif

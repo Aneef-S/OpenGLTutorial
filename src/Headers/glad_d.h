@@ -1,3 +1,6 @@
+#ifndef GLAD_D_H
+#define GLAD_D_H
+
 #include <glad/glad.h>
 
 
@@ -35,3 +38,6 @@ void glBufferData_d(GLenum mode,GLsizeiptr size,const GLvoid* data,GLenum usage)
 {
   glBufferData(mode,size,data,usage);
 }
+
+
+#endif
