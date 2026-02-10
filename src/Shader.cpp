@@ -99,6 +99,17 @@ void Shader::SetFloat(const std::string &floatName, float value) const
     );
 }
 
+void Shader::SetMatrix4fv(const std::string &matrixName, glm::mat4 &value) const
+{
+   
+    glUniformMatrix4fv(
+        glGetUniformLocation(shaderProgramID,matrixName.c_str()),
+        1,
+        GL_FALSE,
+        glm::value_ptr(value)
+    );
+}
+
 void Shader::Use()
 {
     glUseProgram(shaderProgramID);

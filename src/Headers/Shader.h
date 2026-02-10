@@ -1,4 +1,5 @@
 
+#include <glm/gtc/type_ptr.hpp>
 
 class Shader
 {
@@ -25,6 +26,11 @@ class Shader
     /// @param boolName Name of the uniform
     /// @param value Value of the uniform
     void SetFloat(const std::string &floatName,float value)const;
+
+    /// @brief Set a 4x4 Matix of float in the shader
+    /// @param matrixName Name of the uniform
+    /// @param value Value of the uniform
+    void SetMatrix4fv(const std::string &matrixName,glm::mat4 &value)const;
 
     /// @brief User the Shader
     void Use();
