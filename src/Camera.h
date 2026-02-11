@@ -10,8 +10,7 @@ class Camera
 {
 private:
 	
-	glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+	
 
 	//Mouse Motion
 	float fov = 45.0f;
@@ -33,6 +32,9 @@ private:
 
 public:
 	glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
+	glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
 	static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 	static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 	Camera(int speed = 10, glm::vec3 initialPosition = glm::vec3(0.0f, 0.0f, -3.0f))

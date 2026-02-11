@@ -271,6 +271,10 @@ int main()
 	shaderProgram.setFloat("light.attenuationConstant", 1.0f);
 	shaderProgram.setFloat("light.attenuationConstantLinear", 0.09f);
 	shaderProgram.setFloat("light.attenuationConsantQuadartic", 0.032f);
+	shaderProgram.setVec3f("light.direction", glm::vec3(0.0f,0.0f,1.0f));
+	shaderProgram.setFloat("light.cutOffAngle", glm::cos(glm::radians(12.5f)));
+	shaderProgram.setFloat("light.outerCutOffAngle", glm::cos(glm::radians(17.0f)));
+
 
 	glm::vec3 lightPosition = glm::vec3(0.0f,0.0f,-2.0f);
 
@@ -305,7 +309,6 @@ int main()
 
 		
 		
-		lightColor = glm::vec4(abs(sin(currentTime)));
 		
 
 	
@@ -350,6 +353,7 @@ int main()
 
 		model = glm::mat4(1.0f);
 		model = glm::translate(model,lightPosition);
+		model = glm::scale(model, glm::vec3(.05f));
 
 		
 		
