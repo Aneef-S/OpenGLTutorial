@@ -11,6 +11,10 @@
 
 #include "Shader.h"
 #include "Camera.h"
+#include "Light.h"
+
+
+
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -30,11 +34,7 @@ int main()
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-
-
 
 	GLFWwindow* window = glfwCreateWindow(800, 600, "OPENGL_RENDERER", NULL, NULL);
 	if (window == NULL)
@@ -228,7 +228,7 @@ int main()
 	float lastTime = 0.0f;
 	float deltaTime = 0.0f;
 
-	glm::vec4 lightColor = glm::vec4(0.8f, 0.8f, 0.7f, 1.0f);
+	glm::vec3 lightColor = glm::vec3(0.8f, 0.8f, 0.7f);
 	glm::vec4 color = glm::vec4(0.2f, 0.2f, 0.0f, 1.0f);
 
 
@@ -241,9 +241,40 @@ int main()
 	float shininess = 64.0f;
 
 
-	glm::vec3 lightAmbient = glm::vec3(0.2f, 0.2f, 0.2f);
-	glm::vec3 lightDiffuse = glm::vec3(0.5f, 0.5f, 0.5f);
-	glm::vec3 lightSpecular = glm::vec3(1.0f, 1.0f, 1.0f);
+
+
+
+
+	DirectionLight directionLight;
+
+	directionLight.direction = glm::vec3(0.0f,-1.0f,0.0f);
+	directionLight.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
+	directionLight.diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+	directionLight.specular =glm::vec3(1.0f, 1.0f, 1.0f);
+	directionLight.color = glm::vec3(0.0f);
+
+
+	SpotLight spotLight;
+
+	
+	glm::vec3 lightPosition = glm::vec3(0.0f,0.0f,-2.0f);
+
+
+	spotLight.direction = glm::vec3(0.0f,0.0f,1.0f);
+	spotLight.ambient = glm::vec3(0.0f, 0.0f, 0.0f);
+	spotLight.diffuse =  glm::vec3(1.0f, 1.0f, 1.0f);
+	spotLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+	spotLight.constant = 1.0f;
+	spotLight.linear = 0.09f;
+	spotLight.quadratic = 0.03f;
+	spotLight.innterCutOffAngle = glm::cos(glm::radians(12.5f));
+	spotLight.outerCutOffAngle = glm::cos(glm::radians(17.0f));
+	spotLight.color = glm::vec3(1.0f,0.5f,0.0f
+	);
+	spotLight.position = lightPosition;
+	
+
+
 
 	const glm::vec3 cubePositions[10] = {
 		glm::vec3(0.0f,  0.0f,  0.0f),
@@ -258,25 +289,56 @@ int main()
 		glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
+
+	const glm::vec3 lightPositions[4] = 
+	{
+		glm::vec3(1.0f,1.0f,1.0f),
+		glm::vec3(2.0f,7.0f,0.0f),
+		glm::vec3(3.0f,2.0f,4.0f),
+		glm::vec3(4.0f,9.0f,1.0f)
+	};
+
 	shaderProgram.use();
 	shaderProgram.setInt("material.diffuse", 0);
 	shaderProgram.setInt("material.specular", 1);
 	shaderProgram.setInt("material.emission", 2);
-
 	shaderProgram.setFloat("material.shininess", shininess);
 	shaderProgram.setFloat("material.emissionStrength", 0.4f);
-	shaderProgram.setVec3f("light.ambient", lightAmbient);
-	shaderProgram.setVec3f("light.diffuse", lightDiffuse);
-	shaderProgram.setVec3f("light.specular", lightSpecular);
-	shaderProgram.setFloat("light.attenuationConstant", 1.0f);
-	shaderProgram.setFloat("light.attenuationConstantLinear", 0.09f);
-	shaderProgram.setFloat("light.attenuationConsantQuadartic", 0.032f);
-	shaderProgram.setVec3f("light.direction", glm::vec3(0.0f,0.0f,1.0f));
-	shaderProgram.setFloat("light.cutOffAngle", glm::cos(glm::radians(12.5f)));
-	shaderProgram.setFloat("light.outerCutOffAngle", glm::cos(glm::radians(17.0f)));
+
+	shaderProgram.setVec3f("spotLight.ambient", spotLight.ambient);
+	shaderProgram.setVec3f("spotLight.diffuse", spotLight.diffuse);
+	shaderProgram.setVec3f("spotLight.specular", spotLight.specular);
+	shaderProgram.setFloat("spotLight.constant", spotLight.constant);
+	shaderProgram.setFloat("spotLight.linear", spotLight.linear);
+	shaderProgram.setFloat("spotLight.quadratic", spotLight.quadratic);
+	shaderProgram.setVec3f("spotLight.direction", spotLight.direction);
+	shaderProgram.setFloat("spotLight.innerCutOffAngle", spotLight.innterCutOffAngle);
+	shaderProgram.setFloat("spotLight.outerCutOffAngle", spotLight.outerCutOffAngle);
+	shaderProgram.setVec3f("spotLight.color",spotLight.color);
+	shaderProgram.setVec3f("spotLight.position",spotLight.position);
 
 
-	glm::vec3 lightPosition = glm::vec3(0.0f,0.0f,-2.0f);
+	shaderProgram.setVec3f("directionLight.direction",directionLight.direction);
+	shaderProgram.setVec3f("directionLight.diffuse",directionLight.diffuse);
+	shaderProgram.setVec3f("directionLight.specular",directionLight.specular);
+	shaderProgram.setVec3f("directionLight.ambient",directionLight.ambient);
+	shaderProgram.setVec3f("directionLight.color",directionLight.color);
+
+
+
+	for(int i=0;i<4;i++)
+	{
+		const std::string index = std::to_string(i); 
+		shaderProgram.setVec3f(("pointLights[" + index + "].position").c_str(),lightPositions[i]);
+		shaderProgram.setVec3f(("pointLights[" + index + "].ambient").c_str(),glm::vec3(0));
+		shaderProgram.setVec3f(("pointLights[" + index + "].diffuse").c_str(),glm::vec3(1.0f));
+		shaderProgram.setVec3f(("pointLights[" + index + "].specular").c_str(),glm::vec3(1.0f));
+		shaderProgram.setVec3f(("pointLights[" + index + "].color").c_str(), glm::normalize(lightPositions[i]));
+		shaderProgram.setFloat(("pointLights[" + index + "].constant").c_str(),1.0f);
+		shaderProgram.setFloat(("pointLights[" + index + "].linear").c_str(),0.09f);
+		shaderProgram.setFloat(("pointLights[" + index + "].quadratic").c_str(),0.034f);
+	}
+
 
 
 	glActiveTexture(GL_TEXTURE0);
@@ -299,7 +361,7 @@ int main()
 		processInput(window);
 		camera.HandleInput(window,deltaTime);
 
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		
@@ -329,8 +391,6 @@ int main()
 			shaderProgram.setMat4f("model", model);
 			shaderProgram.setMat4f("view", view);
 			shaderProgram.setMat4f("projection", projection);
-			shaderProgram.setVec3f("light.position", lightPosition);
-			shaderProgram.setVec4f("light.color", lightColor);
 			shaderProgram.setVec3f("viewPos", camera.cameraPosition);
 			shaderProgram.setFloat("material.emissionStrength", 0);
 
@@ -361,10 +421,23 @@ int main()
 		lightShaderProgram.setMat4f("model", model);
 		lightShaderProgram.setMat4f("view", view);
 		lightShaderProgram.setMat4f("projection", projection);
-		lightShaderProgram.setVec4f("color", lightColor);
+		lightShaderProgram.setVec3f("color", lightColor);
 
 		glBindVertexArray(cube_VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+
+
+		for(int i=0;i<4;i++)
+		{
+			model = glm::mat4(1.0f);
+			model = glm::translate(model,lightPositions[i]);
+			
+			lightShaderProgram.setMat4f("model",model);
+			lightShaderProgram.setVec3f("color", glm::normalize(lightPositions[i]));
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
+
 		glBindVertexArray(0);
 
 		
