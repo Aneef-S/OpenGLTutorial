@@ -363,3 +363,6 @@ MigrationBackup/
 FodyWeavers.xsd
 
 .vscode
+build/main.exe
+build/main.exe
+Linking/include/assimp/.editorconfig
