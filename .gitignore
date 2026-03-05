@@ -366,3 +366,6 @@ FodyWeavers.xsd
 build/main.exe
 build/main.exe
 Linking/include/assimp/.editorconfig
+build/main.exe
+resources/models/backpack.zip
+

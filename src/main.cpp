@@ -6,12 +6,20 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <string>
 #include <filesystem>
+
+#include <fstream>
+#include <sstream>
+#include <iostream>
+
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+
 
 #include "Shader.h"
 #include "Camera.h"
 #include "Light.h"
+#include "Model.h"
+
+
 
 
 
@@ -28,9 +36,13 @@ void processInput
 
 
 
+
+
 int main()
 {
 	glfwInit();
+
+
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -70,9 +82,14 @@ int main()
 	unsigned int diffuseMap = loadTexture("resources/textures/container2.png");
 	unsigned int specularMap = loadTexture("resources/textures/container2_specular.png");
 	unsigned int emissionMap = loadTexture("resources/textures/emission.jpg");
-	
 
 	stbi_set_flip_vertically_on_load(true);
+
+	Model ourModel("resources/models/backpack/backpack.obj");
+	Shader simpleShader("src/Shaders/SimpleVertexShader.glsl","src/Shaders/SimpleFragmentShader.glsl");
+
+	
+
 
 	const float minusPointFive = -0.5f;
 	const float plusPointFive = 0.5f;
@@ -175,6 +192,8 @@ int main()
 
 	};
 
+	
+
 
 	unsigned int cube_VBO, cube_VAO;
 
@@ -247,11 +266,11 @@ int main()
 
 	DirectionLight directionLight;
 
-	directionLight.direction = glm::vec3(0.0f,-1.0f,0.0f);
+	directionLight.direction = glm::vec3(-1.0f,-1.0f,-1.0f);
 	directionLight.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
 	directionLight.diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
 	directionLight.specular =glm::vec3(1.0f, 1.0f, 1.0f);
-	directionLight.color = glm::vec3(0.0f);
+	directionLight.color = glm::vec3(226/255.0f, 128/255.0f, 29/255.0f);
 
 
 	SpotLight spotLight;
@@ -298,7 +317,7 @@ int main()
 		glm::vec3(4.0f,9.0f,1.0f)
 	};
 
-	shaderProgram.use();
+	simpleShader.use();
 	shaderProgram.setInt("material.diffuse", 0);
 	shaderProgram.setInt("material.specular", 1);
 	shaderProgram.setInt("material.emission", 2);
@@ -318,11 +337,11 @@ int main()
 	shaderProgram.setVec3f("spotLight.position",spotLight.position);
 
 
-	shaderProgram.setVec3f("directionLight.direction",directionLight.direction);
-	shaderProgram.setVec3f("directionLight.diffuse",directionLight.diffuse);
-	shaderProgram.setVec3f("directionLight.specular",directionLight.specular);
-	shaderProgram.setVec3f("directionLight.ambient",directionLight.ambient);
-	shaderProgram.setVec3f("directionLight.color",directionLight.color);
+	simpleShader.setVec3f("directionLight.direction",directionLight.direction);
+	simpleShader.setVec3f("directionLight.diffuse",directionLight.diffuse);
+	simpleShader.setVec3f("directionLight.specular",directionLight.specular);
+	simpleShader.setVec3f("directionLight.ambient",directionLight.ambient);
+	simpleShader.setVec3f("directionLight.color",directionLight.color);
 
 
 
@@ -361,7 +380,7 @@ int main()
 		processInput(window);
 		camera.HandleInput(window,deltaTime);
 
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(68/255.0f, 67/255.0f, 45/255.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		
@@ -374,71 +393,80 @@ int main()
 		
 
 	
-		shaderProgram.use();
+		// shaderProgram.use();
 
-		model = glm::mat4(1.0f);
+		// model = glm::mat4(1.0f);
 	
 
 
 
-		for (unsigned int i = 0; i < 10; i++)
-		{
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePositions[i]);
+		// for (unsigned int i = 0; i < 10; i++)
+		// {
+		// 	model = glm::mat4(1.0f);
+		// 	model = glm::translate(model, cubePositions[i]);
 
-			model = glm::rotate(model,glm::radians(i * 20.0f),glm::vec3(1.0f,3.0f,.5f));
+		// 	model = glm::rotate(model,glm::radians(i * 20.0f),glm::vec3(1.0f,3.0f,.5f));
 
-			shaderProgram.setMat4f("model", model);
-			shaderProgram.setMat4f("view", view);
-			shaderProgram.setMat4f("projection", projection);
-			shaderProgram.setVec3f("viewPos", camera.cameraPosition);
-			shaderProgram.setFloat("material.emissionStrength", 0);
+		// 	shaderProgram.setMat4f("model", model);
+		// 	shaderProgram.setMat4f("view", view);
+		// 	shaderProgram.setMat4f("projection", projection);
+			// shaderProgram.setVec3f("viewPos", camera.cameraPosition);
+		// 	shaderProgram.setFloat("material.emissionStrength", 0);
 
-			glBindVertexArray(cube_VAO);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-			glBindVertexArray(0);
+		// 	glBindVertexArray(cube_VAO);
+		// 	glDrawArrays(GL_TRIANGLES, 0, 36);
+		// 	glBindVertexArray(0);
 
 
 
-		}
+		// }
 
 
 		
 		
 
 
-		lightShaderProgram.use();
+		// lightShaderProgram.use();
 
 		
 
-		model = glm::mat4(1.0f);
-		model = glm::translate(model,lightPosition);
-		model = glm::scale(model, glm::vec3(.05f));
+		// model = glm::mat4(1.0f);
+		// model = glm::translate(model,lightPosition);
+		// model = glm::scale(model, glm::vec3(.05f));
 
 		
 		
 
-		lightShaderProgram.setMat4f("model", model);
-		lightShaderProgram.setMat4f("view", view);
-		lightShaderProgram.setMat4f("projection", projection);
-		lightShaderProgram.setVec3f("color", lightColor);
+		// lightShaderProgram.setMat4f("model", model);
+		// lightShaderProgram.setMat4f("view", view);
+		// lightShaderProgram.setMat4f("projection", projection);
+		// lightShaderProgram.setVec3f("color", lightColor);
 
-		glBindVertexArray(cube_VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		// glBindVertexArray(cube_VAO);
+		// glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
 
-		for(int i=0;i<4;i++)
-		{
-			model = glm::mat4(1.0f);
-			model = glm::translate(model,lightPositions[i]);
+		// for(int i=0;i<4;i++)
+		// {
+		// 	model = glm::mat4(1.0f);
+		// 	model = glm::translate(model,lightPositions[i]);
 			
-			lightShaderProgram.setMat4f("model",model);
-			lightShaderProgram.setVec3f("color", glm::normalize(lightPositions[i]));
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
+		// 	lightShaderProgram.setMat4f("model",model);
+		// 	lightShaderProgram.setVec3f("color", glm::normalize(lightPositions[i]));
+		// 	glDrawArrays(GL_TRIANGLES, 0, 36);
+		// }
 
-		glBindVertexArray(0);
+		// glBindVertexArray(0);
+		
+
+		simpleShader.use();
+		simpleShader.setVec3f("viewPos", camera.cameraPosition);
+		simpleShader.setMat4f("model",model);
+		simpleShader.setMat4f("projection",projection);
+		simpleShader.setMat4f("view",view);
+
+		ourModel.Draw(simpleShader);
 
 		
 
