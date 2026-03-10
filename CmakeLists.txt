@@ -1,0 +1,43 @@
+ cmake_minimum_required(VERSION 4.3)
+
+project(OpenGLRenderer)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Source files
+file(GLOB_RECURSE SOURCES
+    src/*.cpp
+    src/*.c
+)
+
+# Executable
+add_executable(main ${SOURCES})
+
+
+# Include directories
+target_include_directories(main PRIVATE
+    C:/msys64/mingw64/include
+    ${PROJECT_SOURCE_DIR}/Linking/include
+    ${PROJECT_SOURCE_DIR}/src/headers
+)
+
+# Library directories
+target_link_directories(main PRIVATE
+    C:/msys64/mingw64/lib
+    ${PROJECT_SOURCE_DIR}/Linking/lib/assimp
+)
+
+# Link libraries
+target_link_libraries(main
+    glfw3
+    opengl32
+    gdi32
+    assimp
+)
+
+
+add_compile_definitions(ASSETS_PATH="${PROJECT_SOURCE_DIR}/assets/")
+add_compile_definitions(SHADERS_PATH="${PROJECT_SOURCE_DIR}/src/Shaders/")

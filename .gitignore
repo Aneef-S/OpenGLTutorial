@@ -363,9 +363,8 @@ MigrationBackup/
 FodyWeavers.xsd
 
 .vscode
-build/main.exe
-build/main.exe
+build
 Linking/include/assimp/.editorconfig
-build/main.exe
 resources/models/backpack.zip
 
+assets/models/backpack.zip
