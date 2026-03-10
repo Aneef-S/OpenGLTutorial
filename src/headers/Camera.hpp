@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CAMERA_HPP
+#define CAMERA_HPP
 
 #include <GLFW/glfw3.h>
 
@@ -22,7 +23,9 @@ private:
 
 
 	float cameraSpeed = 10.0f;
-
+	glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
+	glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	
 
@@ -31,9 +34,7 @@ private:
 
 
 public:
-	glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
-	glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+	
 
 	static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 	static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -43,8 +44,11 @@ public:
 
 	glm::mat4 GetView() const;
 	glm::mat4 GetProjection() const;
+	glm::vec3 GetPosition() const;
 	void HandleInput(GLFWwindow* window, float deltaTime);
 
 	void SetLastPosition(float lastx, float lasty);
 };
+
+#endif // CAMERA_HPP
 

@@ -1,4 +1,4 @@
-#include "Camera.h"
+#include "Camera.hpp"
 
 glm::mat4 Camera::GetView() const
 {
@@ -12,7 +12,10 @@ glm::mat4 Camera::GetProjection() const
 	return projection;
 }
 
-
+glm::vec3 Camera::GetPosition() const
+{
+    return this->cameraPosition;
+}
 
 void Camera::HandleInput(GLFWwindow* window, float deltaTime)
 {

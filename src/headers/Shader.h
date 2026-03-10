@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SHADER_H
+#define SHADER_H
 
 #include <glad/glad.h>
 #include <string>
@@ -16,6 +17,7 @@ class Shader
 	unsigned int ID;
 	// constructor reads and builds the shader
 	Shader(const char* vertexPath, const char* fragmentPath);
+	Shader();
 	// use/activate the shader
 	void use() const;
 	// utility uniform functions
@@ -26,3 +28,5 @@ class Shader
 	void setVec4f(const std::string& name,const glm::vec4& value) const;
 	void setVec3f(const std::string& name,const glm::vec3& value) const;
 };
+
+#endif // SHADER_H

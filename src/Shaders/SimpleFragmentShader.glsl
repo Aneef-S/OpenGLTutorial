@@ -18,7 +18,7 @@ struct DirectionLight
 	vec3 color;
 };
 
-uniform DirectionLight directionLight;
+uniform DirectionLight directionLight[1];
 uniform sampler2D texture_diffuse1;
 uniform sampler2D texture_specular1;
 
@@ -61,6 +61,6 @@ void main()
 {    
     vec3 normal = normalize(Normal);
     vec3 viewDirection = normalize(viewPos-FragmentPosition);
-    vec3 result = CalculateDirectionLight(directionLight,normal,viewDirection);
+    vec3 result = CalculateDirectionLight(directionLight[0],normal,viewDirection);
     FragColor = vec4(result, 1.0);
 }
