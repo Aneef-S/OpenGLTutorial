@@ -5,6 +5,7 @@
 #include "Renderer.h"
 #include "Input.hpp"
 #include "Cube.h"
+#include "Plane.h"
 
 class Application
 {
@@ -25,11 +26,13 @@ private:
     Cube cube1;
     Cube cube2;
     Cube floor;
+    Plane grass;
 
     // Entity entity = Entity(model);
     Entity cEntity1 = Entity(cube1);
     Entity cEntity2 = Entity(cube2);
     Entity floorEntity = Entity(floor);
+    Entity grassEntity = Entity(grass);
 
 public:
     void Initialize()
@@ -39,6 +42,7 @@ public:
         cube1.SetTexture(ASSETS_PATH "textures/container.jpg");
         cube2.SetTexture(ASSETS_PATH "textures/container2.png");
         floor.SetTexture(ASSETS_PATH "textures/floor.jpg");
+        grass.SetTexture(ASSETS_PATH "textures/blending_transparent_window.png");
 
 
         dirLight.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
@@ -61,7 +65,10 @@ public:
 
     void Run()
     {
+        glEnable(GL_CULL_FACE);  
         glEnable(GL_STENCIL_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         while (!glfwWindowShouldClose(window.window))
         {
             float currentFrame = glfwGetTime();
@@ -69,11 +76,6 @@ public:
             float deltaTime = currentFrame - lastFrame;
             lastFrame = currentFrame;
 
-               
-  
-
-            
-           
             inputHandler.processKeyInput();
             scene.camera.HandleInput(window.window, deltaTime);
 
@@ -93,26 +95,14 @@ public:
             renderer.InitializeRendererValues();
             scene.entities.clear();
 
-
             // Render the floor first, to set stencil buffer values to 1 where the floor is drawn
-
             model = glm::mat4(1.0f);
             model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
             model = glm::scale(model, glm::vec3(20.0f, .99f, 20.0f));
             floorEntity.transform = model;
             scene.entities.emplace_back(floorEntity);
 
-
-            glStencilMask(0x00); 
-            renderer.SetShader(shader);
-            renderer.Render();
-
-
-            scene.entities.clear();
-
-
             // Render the cubes, which will set stencil buffer values to 1 where the cubes are drawn
-          
             model = glm::mat4(1.0f);
             model = glm::rotate(model, glm::radians(20.0f * currentFrame), glm::vec3(0.0f, 1.0f, 0.0f));
             cEntity1.transform = model;
@@ -123,41 +113,17 @@ public:
             cEntity2.transform = model;
             scene.entities.emplace_back(cEntity2);
 
-            glStencilFunc(GL_ALWAYS, 1, 0xFF); 
-            glStencilMask(0xFF); 
+            //Render the grass
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(4.0f, 0.0f, 4.0f));
+            grassEntity.transform = model;
+            scene.entities.emplace_back(grassEntity);
+
             renderer.SetShader(shader);
             renderer.Render();
 
             scene.entities.clear();
 
-
-            // Render the outline of the cubes, which will only be drawn where stencil buffer values are not 1 (i.e., around the cubes)
-
-
-            model = glm::mat4(1.0f);
-            model = glm::rotate(model, glm::radians(20.0f * currentFrame), glm::vec3(0.0f, 1.0f, 0.0f));
-            model = glm::scale(model, glm::vec3(1.05f));
-            cEntity1.transform = model;
-            scene.entities.emplace_back(cEntity1);
-
-   
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
-            model = glm::rotate(model, glm::radians(-20.0f * currentFrame), glm::vec3(0.0f, 1.0f, 0.0f));
-            model = glm::scale(model, glm::vec3(1.05f));
-            cEntity2.transform = model;
-            scene.entities.emplace_back(cEntity2);
-
-            glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-            glStencilMask(0x00); 
-            glDisable(GL_DEPTH_TEST);
-            renderer.SetShader(singleColorShader);
-            renderer.InitializeRendererValues();
-            renderer.Render();
-
-            glStencilMask(0xFF);
-            glStencilFunc(GL_ALWAYS, 1, 0xFF);   
-            glEnable(GL_DEPTH_TEST);  
 
             glfwSwapBuffers(window.window);
             glfwPollEvents();

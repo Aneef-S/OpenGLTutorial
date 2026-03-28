@@ -5,7 +5,7 @@ void Entity::Draw(Shader &shader)
     switch (type)
     {
     case EntityType::Shape:
-        cube->Draw(shader);
+        shape->Draw(shader);
         break;
     case EntityType::Model:
         model->Draw(shader);

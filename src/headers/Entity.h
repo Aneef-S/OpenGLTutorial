@@ -3,7 +3,7 @@
 
 #include "Model.h"
 #include "Shader.h"
-#include "Cube.h"
+#include "Shape.h"
 
 
 enum class EntityType
@@ -18,12 +18,12 @@ class Entity
 public:
     EntityType type;
     Model* model;
-    Cube* cube;
+    Shape* shape;
     glm::mat4 transform = glm::mat4(1.0f);
-    Entity(Cube &_cube) :
-        cube(&_cube), type(EntityType::Shape){}   
-    Entity(Cube &_cube,glm::mat4 _transform):
-        transform(_transform), cube(&_cube), type(EntityType::Shape){}
+    Entity(Shape &_shape) :
+        shape(&_shape), type(EntityType::Shape){}   
+    Entity(Shape &_shape,glm::mat4 _transform):
+        transform(_transform), shape(&_shape), type(EntityType::Shape){}
     Entity(Model &_model) : 
         model(&_model), type(EntityType::Model){}
     Entity(Model &_model,glm::mat4 _transform): 

@@ -23,6 +23,7 @@ target_include_directories(main PRIVATE
     ${PROJECT_SOURCE_DIR}/Linking/include
     ${PROJECT_SOURCE_DIR}/src/headers
     ${PROJECT_SOURCE_DIR}/src/headers/shapes
+    ${PROJECT_SOURCE_DIR}/src/headers/utils
 )
 
 # Library directories

@@ -22,30 +22,30 @@ uniform DirectionLight directionLight[1];
 uniform sampler2D texture_diffuse1;
 uniform sampler2D texture_specular1;
 
-vec3 CalculateDirectionLight(DirectionLight light,vec3 normal,vec3 viewDirection)
+vec4 CalculateDirectionLight(DirectionLight light,vec3 normal,vec3 viewDirection)
 {
 	vec3 lightDirection = normalize(-light.direction);
 
 	//Ambient light
-	vec3 ambient = light.ambient * texture(texture_diffuse1,TexCoord).rgb;
+	vec4 ambient = vec4(light.ambient, 1.0) * texture(texture_diffuse1,TexCoord);
 
 	//Calculating the diffuse magnitude
 	float diffuseMagnitude = max(dot(normal,lightDirection),0.0);
-	vec3 diffuse = 
+	vec4 diffuse = 
 		diffuseMagnitude * 
-		light.diffuse * 
-		texture(texture_diffuse1,TexCoord).rgb *
-		light.color
+		vec4(light.diffuse, 1.0) * 
+		texture(texture_diffuse1,TexCoord) *
+		vec4(light.color, 1.0)
 		;
 
 	//Specular light
 	vec3 reflectDirection = reflect(-lightDirection,normal);
 	float specularMagnitude = pow(max(dot(viewDirection,reflectDirection),0),32);
-	vec3 specular = 
+	vec4 specular = 
 		specularMagnitude *  
-		light.specular * 
-		texture(texture_specular1,TexCoord).rgb *
-		light.color
+		vec4(light.specular, 1.0) * 
+		texture(texture_specular1,TexCoord) *
+		vec4(light.color, 1.0)
 		;
 
 	return (ambient + diffuse + specular); 
@@ -57,22 +57,11 @@ vec3 CalculateDirectionLight(DirectionLight light,vec3 normal,vec3 viewDirection
 uniform vec3 viewPos;
 
 
-float near = 0.1f;
-float far = 100.0f;
-
-float LinearizeDepth(float depth)
-{
-	float z = depth * 2.0 - 1.0; // Back to NDC 
-	return (2.0 * near * far) / (far + near - z * (far - near));	
-}
-
-
 void main()
 {    
     vec3 normal = normalize(Normal);
     vec3 viewDirection = normalize(viewPos-FragmentPosition);
-    vec3 result = CalculateDirectionLight(directionLight[0],normal,viewDirection);
-    FragColor = vec4(result, 1.0);
-	// float depthValue = LinearizeDepth(gl_FragCoord.z) / far; // Divide by far for demonstration
-	// FragColor = vec4(vec3(depthValue), 1.0);
+    vec4 result = CalculateDirectionLight(directionLight[0],normal,viewDirection);
+    FragColor = result;
+
 }
