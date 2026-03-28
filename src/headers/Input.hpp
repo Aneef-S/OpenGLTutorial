@@ -9,10 +9,10 @@ class Input
 private:
     Window* window;
 public:
-    Input(Window* window) : window(window) {
+    Input(Window &window) : window(&window) {
 
-        glfwSetScrollCallback(window->window, Input::processScrollInput);
-        glfwSetCursorPosCallback(window->window, Input::processMouseInput);
+        glfwSetScrollCallback(window.window, Input::processScrollInput);
+        glfwSetCursorPosCallback(window.window, Input::processMouseInput);
     }
     void processKeyInput();
     static void processMouseInput(GLFWwindow* window, double xpos, double ypos);

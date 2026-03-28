@@ -22,6 +22,7 @@ target_include_directories(main PRIVATE
     C:/msys64/mingw64/include
     ${PROJECT_SOURCE_DIR}/Linking/include
     ${PROJECT_SOURCE_DIR}/src/headers
+    ${PROJECT_SOURCE_DIR}/src/headers/shapes
 )
 
 # Library directories

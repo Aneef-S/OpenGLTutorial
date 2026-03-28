@@ -15,7 +15,8 @@ private:
     Window *window;
 
 public:
-    void Render();
+    void Render() const;
+    void InitializeRendererValues();
     Renderer(Window &window) : window(&window)
     {
         glEnable(GL_DEPTH_TEST);

@@ -368,3 +368,5 @@ Linking/include/assimp/.editorconfig
 resources/models/backpack.zip
 
 assets/models/backpack.zip
+
+build/main.exe

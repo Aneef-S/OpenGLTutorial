@@ -3,16 +3,31 @@
 
 #include "Model.h"
 #include "Shader.h"
+#include "Cube.h"
 
+
+enum class EntityType
+{
+    Model,
+    Shape
+};
 
 /// @brief An independet object that can be drawn. Includes Model and transformation.
 class Entity
 {
 public:
+    EntityType type;
     Model* model;
+    Cube* cube;
     glm::mat4 transform = glm::mat4(1.0f);
-    Entity(Model &_model) : model(&_model){}
-    Entity(Model &_model,glm::mat4 _transform): transform(_transform), model(&_model){}
+    Entity(Cube &_cube) :
+        cube(&_cube), type(EntityType::Shape){}   
+    Entity(Cube &_cube,glm::mat4 _transform):
+        transform(_transform), cube(&_cube), type(EntityType::Shape){}
+    Entity(Model &_model) : 
+        model(&_model), type(EntityType::Model){}
+    Entity(Model &_model,glm::mat4 _transform): 
+        transform(_transform), model(&_model), type(EntityType::Model){}
     void Draw(Shader &shader);
 };
 

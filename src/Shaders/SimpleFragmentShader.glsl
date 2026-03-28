@@ -57,10 +57,22 @@ vec3 CalculateDirectionLight(DirectionLight light,vec3 normal,vec3 viewDirection
 uniform vec3 viewPos;
 
 
+float near = 0.1f;
+float far = 100.0f;
+
+float LinearizeDepth(float depth)
+{
+	float z = depth * 2.0 - 1.0; // Back to NDC 
+	return (2.0 * near * far) / (far + near - z * (far - near));	
+}
+
+
 void main()
 {    
     vec3 normal = normalize(Normal);
     vec3 viewDirection = normalize(viewPos-FragmentPosition);
     vec3 result = CalculateDirectionLight(directionLight[0],normal,viewDirection);
     FragColor = vec4(result, 1.0);
+	// float depthValue = LinearizeDepth(gl_FragCoord.z) / far; // Divide by far for demonstration
+	// FragColor = vec4(vec3(depthValue), 1.0);
 }

@@ -2,6 +2,15 @@
 
 void Entity::Draw(Shader &shader)
 {
-    
-    model->Draw(shader);
+    switch (type)
+    {
+    case EntityType::Shape:
+        cube->Draw(shader);
+        break;
+    case EntityType::Model:
+        model->Draw(shader);
+        break;
+    default:
+        break;
+    }
 }
