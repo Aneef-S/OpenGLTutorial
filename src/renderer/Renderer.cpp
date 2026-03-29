@@ -13,19 +13,22 @@ void Renderer::Render() const
 
 }
 
-void Renderer::InitializeRendererValues()
+void Renderer::AddLights()
 {
     shader->use();
-
-    shader->setVec3f("viewPos", scene->camera.GetPosition());
-    shader->setMat4f("projection", scene->camera.GetProjection());
-    shader->setMat4f("view", scene->camera.GetView());
-
     for (int i = 0; i < scene->dirLights.size(); i++)
     {
         scene->dirLights[i].AddToShader(*shader, std::to_string(i));
     }
  
+}
+
+void Renderer::ResetCameraValues()
+{
+    shader->use();
+    shader->setVec3f("viewPos", scene->camera.GetPosition());
+    shader->setMat4f("projection", scene->camera.GetProjection());
+    shader->setMat4f("view", scene->camera.GetView());
 }
 
 void Renderer::SetScene(Scene &scene)

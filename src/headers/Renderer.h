@@ -16,12 +16,14 @@ private:
 
 public:
     void Render() const;
-    void InitializeRendererValues();
     Renderer(Window &window) : window(&window)
     {
         glEnable(GL_DEPTH_TEST);
         stbi_set_flip_vertically_on_load(true);
     }
+
+    void ResetCameraValues();
+    void AddLights();
     void SetScene(Scene &scene);
     void SetShader(Shader &shader);
     void SetWindow(Window &window);

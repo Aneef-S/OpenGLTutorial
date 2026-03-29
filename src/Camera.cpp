@@ -45,7 +45,25 @@ void Camera::SetLastPosition(float lastx, float lasty)
 	lastY = lasty;
 }
 
+void Camera::LookBackward()
+{
+    yaw += 180.0f; // Turn around 180 degrees
+    
+    cameraFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront.y = sin(glm::radians(pitch));
+    cameraFront.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(cameraFront);
+}
 
+void Camera::LookForward()
+{
+    yaw -= 180.0f; // Turn back to the original direction
+    
+    cameraFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront.y = sin(glm::radians(pitch));
+    cameraFront.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(cameraFront);
+}
 void Camera::mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));

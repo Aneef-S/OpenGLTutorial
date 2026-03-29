@@ -48,6 +48,8 @@ public:
 	void HandleInput(GLFWwindow* window, float deltaTime);
 
 	void SetLastPosition(float lastx, float lasty);
+	void LookBackward();
+	void LookForward();
 };
 
 #endif // CAMERA_HPP
