@@ -199,6 +199,12 @@ public:
 
         screenShader.use();
         screenShader.setInt("screenTexture", 0);
+
+        skyboxShader.use();
+        skyboxShader.setInt("skybox", 0);
+
+        shader.use();
+        shader.setInt("skybox", 0);
     }
 
     void Run()
@@ -229,8 +235,6 @@ public:
             renderer.AddLights();
             renderer.ResetCameraValues();
             scene.entities.clear();
-
-            
 
             // Render the floor first, to set stencil buffer values to 1 where the floor is drawn
             model = glm::mat4(1.0f);
