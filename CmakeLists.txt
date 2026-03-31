@@ -43,3 +43,4 @@ target_link_libraries(main
 
 add_compile_definitions(ASSETS_PATH="${PROJECT_SOURCE_DIR}/assets/")
 add_compile_definitions(SHADERS_PATH="${PROJECT_SOURCE_DIR}/src/Shaders/")
+add_compile_definitions(TEXTURES_PATH="${PROJECT_SOURCE_DIR}/assets/textures/")

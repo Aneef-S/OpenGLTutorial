@@ -5,6 +5,7 @@
 #include "Input.hpp"
 #include "Cube.h"
 #include "Plane.h"
+#include "Utils.h"
 
 float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
     // positions   // texCoords
@@ -28,6 +29,50 @@ float mirrorQuadVertices[] = {
     -0.4f,  0.9f,  1.0f, 1.0f  // Top-Left
 };
 
+float skyboxVertices[] = {
+    // positions          
+    -1.0f,  1.0f, -1.0f,
+    -1.0f, -1.0f, -1.0f,
+     1.0f, -1.0f, -1.0f,
+     1.0f, -1.0f, -1.0f,
+     1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
+
+    -1.0f, -1.0f,  1.0f,
+    -1.0f, -1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f,  1.0f,
+    -1.0f, -1.0f,  1.0f,
+
+     1.0f, -1.0f, -1.0f,
+     1.0f, -1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f, -1.0f,
+     1.0f, -1.0f, -1.0f,
+
+    -1.0f, -1.0f,  1.0f,
+    -1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+     1.0f, -1.0f,  1.0f,
+    -1.0f, -1.0f,  1.0f,
+
+    -1.0f,  1.0f, -1.0f,
+     1.0f,  1.0f, -1.0f,
+     1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+    -1.0f,  1.0f,  1.0f,
+    -1.0f,  1.0f, -1.0f,
+
+    -1.0f, -1.0f, -1.0f,
+    -1.0f, -1.0f,  1.0f,
+     1.0f, -1.0f, -1.0f,
+     1.0f, -1.0f, -1.0f,
+    -1.0f, -1.0f,  1.0f,
+     1.0f, -1.0f,  1.0f
+};
 
 class Application
 {
@@ -41,6 +86,7 @@ private:
     Model model = Model(ASSETS_PATH "models/backpack/backpack.obj");
     Shader shader = Shader(SHADERS_PATH "SimpleVertexShader.glsl", SHADERS_PATH "SimpleFragmentShader.glsl");
     Shader screenShader = Shader(SHADERS_PATH "ScreenVertexShader.glsl", SHADERS_PATH "ScreenFragmentShader.glsl");
+    Shader skyboxShader = Shader(SHADERS_PATH "SkyboxVertexShader.glsl", SHADERS_PATH "SkyboxFragmentShader.glsl");
     DirectionLight dirLight = DirectionLight();
 
     Cube cube1;
@@ -54,35 +100,64 @@ private:
     Entity floorEntity = Entity(floor);
     Entity grassEntity = Entity(grass);
 
+    std::vector<std::string> faces = 
+    {
+        TEXTURES_PATH "skybox/right.jpg",
+        TEXTURES_PATH "skybox/left.jpg",
+        TEXTURES_PATH "skybox/top.jpg",
+        TEXTURES_PATH "skybox/bottom.jpg",
+        TEXTURES_PATH "skybox/front.jpg",
+        TEXTURES_PATH "skybox/back.jpg"
+    };
+
+    unsigned int cubemapTexture;
+    
+
+    unsigned int skyboxVAO, skyboxVBO;
+
     unsigned int framebuffer;
     unsigned int textureColorBuffer;
     unsigned int rbo; // render buffer object
     unsigned int quadVAO, quadVBO;
-    unsigned int mirrorVAO, mirrorVBO;
-    unsigned int mirrorFramebuffer;
-    unsigned int mirrorTextureColorBuffer;
-    unsigned int mirrorRBO;
+
 
 public:
     void Initialize()
     {
         // glDepthFunc(GL_ALWAYS);
 
-        cube1.SetTexture(ASSETS_PATH "textures/container.jpg");
-        cube2.SetTexture(ASSETS_PATH "textures/container2.png");
-        floor.SetTexture(ASSETS_PATH "textures/floor.jpg");
-        grass.SetTexture(ASSETS_PATH "textures/blending_transparent_window.png");
+        cube1.SetTexture(TEXTURES_PATH "container.jpg");
+        cube2.SetTexture(TEXTURES_PATH "container2.png");
+        floor.SetTexture(TEXTURES_PATH "floor.jpg");
+        grass.SetTexture(TEXTURES_PATH "blending_transparent_window.png");
+
+        stbi_set_flip_vertically_on_load(false);
+        cubemapTexture = Utils::LoadCubemap(faces);
+        stbi_set_flip_vertically_on_load(true);
 
         dirLight.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
         dirLight.diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
         dirLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
         dirLight.direction = glm::vec3(-1.0f, -1.0f, -1.0f);
-        dirLight.color = glm::vec3(225 / 255.0f, 128 / 255.0f, 29 / 255.0f);
+        dirLight.color = glm::vec3(200 / 255.0f, 200 / 255.0f, 255 / 255.0f);
 
         scene.dirLights.emplace_back(dirLight);
 
         renderer.SetScene(scene);
         renderer.SetShader(shader);
+
+
+        // Skybox VAO and VBO setup
+        glGenVertexArrays(1, &skyboxVAO);
+        glGenBuffers(1, &skyboxVBO);
+
+        glBindVertexArray(skyboxVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+
 
         
         //Quad for the screen
@@ -122,46 +197,8 @@ public:
             std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-
-        //Quad for mirror
-        glGenVertexArrays(1, &mirrorVAO);
-        glGenBuffers(1, &mirrorVBO);
-        glBindVertexArray(mirrorVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, mirrorVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(mirrorQuadVertices), &mirrorQuadVertices, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-
-        glGenFramebuffers(1, &mirrorFramebuffer);
-        glBindFramebuffer(GL_FRAMEBUFFER, mirrorFramebuffer);
-
-        // generting and attaching a texture color buffer to the mirror frame buffer
-        glGenTextures(1, &mirrorTextureColorBuffer);
-        glBindTexture(GL_TEXTURE_2D, mirrorTextureColorBuffer);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mirrorTextureColorBuffer, 0);
-
-        // generating and binding render buffer object
-        glGenRenderbuffers(1, &mirrorRBO);
-        glBindRenderbuffer(GL_RENDERBUFFER, mirrorRBO);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
-        glBindRenderbuffer(GL_RENDERBUFFER, mirrorRBO);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mirrorRBO);
-
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
         screenShader.use();
         screenShader.setInt("screenTexture", 0);
-
-
-
     }
 
     void Run()
@@ -184,12 +221,16 @@ public:
             glClearColor(50 / 255.0f, 25 / 255.0f, 0 / 255.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+           
+
             glm::mat4 model = glm::mat4(1.0f);
 
             renderer.SetShader(shader);
             renderer.AddLights();
             renderer.ResetCameraValues();
             scene.entities.clear();
+
+            
 
             // Render the floor first, to set stencil buffer values to 1 where the floor is drawn
             model = glm::mat4(1.0f);
@@ -218,15 +259,17 @@ public:
             renderer.SetShader(shader);
             renderer.Render();
 
-            glBindFramebuffer(GL_FRAMEBUFFER, mirrorFramebuffer);
-            glEnable(GL_DEPTH_TEST);
-            glClearColor(50 / 255.0f, 25 / 255.0f, 0 / 255.0f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            scene.camera.LookBackward();
-            renderer.ResetCameraValues();
-            renderer.Render();
-            scene.camera.LookForward();
+            //rendering skybox last, since we want it to be at the farthest depth
+            glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+            skyboxShader.use();
+            skyboxShader.setMat4f("projection", scene.camera.GetProjection());
+            skyboxShader.setMat4f("view", glm::mat4(glm::mat3(scene.camera.GetView())));
+            glBindVertexArray(skyboxVAO);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+            glBindVertexArray(0);
+            glDepthFunc(GL_LESS); // set depth function back to default
 
             scene.entities.clear();
 
@@ -240,10 +283,6 @@ public:
             glBindTexture(GL_TEXTURE_2D, textureColorBuffer);	// use the color attachment texture as the texture of the quad plane
             glDrawArrays(GL_TRIANGLES, 0, 6);
 
-            //rendering the mirror quad
-            glBindVertexArray(mirrorVAO);
-            glBindTexture(GL_TEXTURE_2D, mirrorTextureColorBuffer);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
 
             glfwSwapBuffers(window.window);
             glfwPollEvents();
@@ -254,10 +293,6 @@ public:
         glDeleteRenderbuffers(1,&rbo);
         glDeleteFramebuffers(1,&framebuffer);
 
-        glDeleteBuffers(1, &mirrorVBO);
-        glDeleteVertexArrays(1, &mirrorVAO);
-        glDeleteRenderbuffers(1, &mirrorRBO);
-        glDeleteFramebuffers(1, &mirrorFramebuffer);
 
         glfwTerminate();
     }
