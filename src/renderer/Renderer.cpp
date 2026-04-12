@@ -26,9 +26,7 @@ void Renderer::AddLights()
 void Renderer::ResetCameraValues()
 {
     shader->use();
-    shader->setVec3f("viewPos", scene->camera.GetPosition());
-    shader->setMat4f("projection", scene->camera.GetProjection());
-    shader->setMat4f("view", scene->camera.GetView());
+    shader->setUniformBlock("Matrices", 0);
 }
 
 void Renderer::SetScene(Scene &scene)

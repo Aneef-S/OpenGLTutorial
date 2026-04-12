@@ -7,9 +7,15 @@ out vec2 TexCoord;
 out vec3 Normal;
 out vec3 FragmentPosition;
 
+layout (std140) uniform Matrices
+{
+    mat4 view;
+    mat4 projection;
+};
+
+
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+
 
 void main()
 {

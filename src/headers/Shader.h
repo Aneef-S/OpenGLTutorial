@@ -27,6 +27,8 @@ class Shader
 	void setMat4f(const std::string & name,const glm::mat4 &value) const;
 	void setVec4f(const std::string& name,const glm::vec4& value) const;
 	void setVec3f(const std::string& name,const glm::vec3& value) const;
+	void setUniformBlock(const std::string& name, unsigned int bindingPoint) const;
+	
 };
 
 #endif // SHADER_H

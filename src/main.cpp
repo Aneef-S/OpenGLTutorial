@@ -120,6 +120,8 @@ private:
     unsigned int rbo; // render buffer object
     unsigned int quadVAO, quadVBO;
 
+    unsigned int uboMatrices;
+
 
 public:
     void Initialize()
@@ -197,6 +199,13 @@ public:
             std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+        glGenBuffers(1, &uboMatrices);
+        glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+        glBufferData(GL_UNIFORM_BUFFER, 2 * sizeof(glm::mat4), NULL, GL_STATIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        glBindBufferRange(GL_UNIFORM_BUFFER, 0, uboMatrices, 0, 2 * sizeof(glm::mat4));
+
+
         screenShader.use();
         screenShader.setInt("screenTexture", 0);
 
@@ -227,6 +236,7 @@ public:
             glClearColor(50 / 255.0f, 25 / 255.0f, 0 / 255.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            
            
 
             glm::mat4 model = glm::mat4(1.0f);
@@ -235,6 +245,12 @@ public:
             renderer.AddLights();
             renderer.ResetCameraValues();
             scene.entities.clear();
+
+            glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(scene.camera.GetView()));
+            glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(scene.camera.GetProjection()));
+            glBindBuffer(GL_UNIFORM_BUFFER, 0); 
+
 
             // Render the floor first, to set stencil buffer values to 1 where the floor is drawn
             model = glm::mat4(1.0f);
@@ -266,8 +282,7 @@ public:
             //rendering skybox last, since we want it to be at the farthest depth
             glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
             skyboxShader.use();
-            skyboxShader.setMat4f("projection", scene.camera.GetProjection());
-            skyboxShader.setMat4f("view", glm::mat4(glm::mat3(scene.camera.GetView())));
+            skyboxShader.setUniformBlock("Matrices", 0);
             glBindVertexArray(skyboxVAO);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
