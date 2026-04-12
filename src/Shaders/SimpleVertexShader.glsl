@@ -1,26 +1,13 @@
 #version 330 core
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aNormal;
-layout (location = 2) in vec2 aTexCoords;
+layout (location = 0) in vec2 aPos;
+layout (location = 1) in vec3 aColor;
 
-out vec2 TexCoord;
-out vec3 Normal;
-out vec3 FragmentPosition;
-
-layout (std140) uniform Matrices
-{
-    mat4 view;
-    mat4 projection;
-};
-
-
-uniform mat4 model;
-
+out VS_OUT {
+    vec3 color;
+}vs_out;
 
 void main()
 {
-    TexCoord = aTexCoords;    
-    gl_Position = projection * view * model * vec4(aPos, 1.0);
-    FragmentPosition = vec3(model * vec4(aPos, 1.0));
-    Normal = mat3(transpose(inverse(model))) * aNormal;
+    gl_Position = vec4(aPos,0.0,1.0);
+    vs_out.color = aColor;
 }

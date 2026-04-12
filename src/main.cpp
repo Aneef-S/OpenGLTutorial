@@ -18,16 +18,6 @@ float quadVertices[] = { // vertex attributes for a quad that fills the entire s
     1.0f, 1.0f, 1.0f, 1.0f
 };
 
-float mirrorQuadVertices[] = { 
-    // positions   // texCoords
-    -0.4f, 0.6f,  1.0f, 0.0f, // Bottom-Left
-     0.4f, 0.6f,  0.0f, 0.0f, // Bottom-Right
-     0.4f,  0.9f,  0.0f, 1.0f, // Top-Right
-
-    -0.4f, 0.6f,  1.0f, 0.0f, // Bottom-Left
-    0.4f,  0.9f,  0.0f, 1.0f, // Top-Right
-    -0.4f,  0.9f,  1.0f, 1.0f  // Top-Left
-};
 
 float skyboxVertices[] = {
     // positions          
@@ -74,6 +64,15 @@ float skyboxVertices[] = {
      1.0f, -1.0f,  1.0f
 };
 
+float points[] = {
+    -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // top-left
+     0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // top-right
+     0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // bottom-right
+    -0.5f, -0.5f, 1.0f, 1.0f, 0.0f  // bottom-left
+}; 
+
+
+
 class Application
 {
 private:
@@ -83,42 +82,22 @@ private:
 
     Scene scene;
 
-    Model model = Model(ASSETS_PATH "models/backpack/backpack.obj");
-    Shader shader = Shader(SHADERS_PATH "SimpleVertexShader.glsl", SHADERS_PATH "SimpleFragmentShader.glsl");
-    Shader screenShader = Shader(SHADERS_PATH "ScreenVertexShader.glsl", SHADERS_PATH "ScreenFragmentShader.glsl");
-    Shader skyboxShader = Shader(SHADERS_PATH "SkyboxVertexShader.glsl", SHADERS_PATH "SkyboxFragmentShader.glsl");
-    DirectionLight dirLight = DirectionLight();
+    Shader shader = Shader(
+        SHADERS_PATH "SimpleVertexShader.glsl",
+        SHADERS_PATH "SimpleGeometryShader.glsl",
+        SHADERS_PATH "SimpleFragmentShader.glsl"
+    );
 
-    Cube cube1;
-    Cube cube2;
-    Cube floor;
-    Plane grass;
-
-    // Entity entity = Entity(model);
-    Entity cEntity1 = Entity(cube1);
-    Entity cEntity2 = Entity(cube2);
-    Entity floorEntity = Entity(floor);
-    Entity grassEntity = Entity(grass);
-
-    std::vector<std::string> faces = 
-    {
-        TEXTURES_PATH "skybox/right.jpg",
-        TEXTURES_PATH "skybox/left.jpg",
-        TEXTURES_PATH "skybox/top.jpg",
-        TEXTURES_PATH "skybox/bottom.jpg",
-        TEXTURES_PATH "skybox/front.jpg",
-        TEXTURES_PATH "skybox/back.jpg"
-    };
-
-    unsigned int cubemapTexture;
-    
-
-    unsigned int skyboxVAO, skyboxVBO;
+    Shader screenShader = Shader(
+        SHADERS_PATH "ScreenVertexShader.glsl",
+        SHADERS_PATH "ScreenFragmentShader.glsl"
+    );
 
     unsigned int framebuffer;
     unsigned int textureColorBuffer;
     unsigned int rbo; // render buffer object
     unsigned int quadVAO, quadVBO;
+    unsigned int pointsVAO, pointsVBO;
 
     unsigned int uboMatrices;
 
@@ -126,42 +105,24 @@ private:
 public:
     void Initialize()
     {
-        // glDepthFunc(GL_ALWAYS);
 
-        cube1.SetTexture(TEXTURES_PATH "container.jpg");
-        cube2.SetTexture(TEXTURES_PATH "container2.png");
-        floor.SetTexture(TEXTURES_PATH "floor.jpg");
-        grass.SetTexture(TEXTURES_PATH "blending_transparent_window.png");
-
-        stbi_set_flip_vertically_on_load(false);
-        cubemapTexture = Utils::LoadCubemap(faces);
-        stbi_set_flip_vertically_on_load(true);
-
-        dirLight.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
-        dirLight.diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-        dirLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
-        dirLight.direction = glm::vec3(-1.0f, -1.0f, -1.0f);
-        dirLight.color = glm::vec3(200 / 255.0f, 200 / 255.0f, 255 / 255.0f);
-
-        scene.dirLights.emplace_back(dirLight);
 
         renderer.SetScene(scene);
         renderer.SetShader(shader);
 
-
-        // Skybox VAO and VBO setup
-        glGenVertexArrays(1, &skyboxVAO);
-        glGenBuffers(1, &skyboxVBO);
-
-        glBindVertexArray(skyboxVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+        // setting up vertex data (and buffer(s)) and configure vertex attributes for the points
+        glGenVertexArrays(1, &pointsVAO);
+        glGenBuffers(1, &pointsVBO);
+        glBindVertexArray(pointsVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, pointsVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
-
-
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
         
+
+
         //Quad for the screen
         glGenVertexArrays(1, &quadVAO);
         glGenBuffers(1, &quadVBO);
@@ -208,12 +169,6 @@ public:
 
         screenShader.use();
         screenShader.setInt("screenTexture", 0);
-
-        skyboxShader.use();
-        skyboxShader.setInt("skybox", 0);
-
-        shader.use();
-        shader.setInt("skybox", 0);
     }
 
     void Run()
@@ -233,11 +188,8 @@ public:
 
             glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
             glEnable(GL_DEPTH_TEST);
-            glClearColor(50 / 255.0f, 25 / 255.0f, 0 / 255.0f, 1.0f);
+            glClearColor(1.0f,1.0f,1.0f,1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            
-           
 
             glm::mat4 model = glm::mat4(1.0f);
 
@@ -246,49 +198,18 @@ public:
             renderer.ResetCameraValues();
             scene.entities.clear();
 
+            shader.use();
+            glBindVertexArray(pointsVAO);
+            glDrawArrays(GL_POINTS, 0, 4);
+
             glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
             glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(scene.camera.GetView()));
             glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(scene.camera.GetProjection()));
             glBindBuffer(GL_UNIFORM_BUFFER, 0); 
 
-
-            // Render the floor first, to set stencil buffer values to 1 where the floor is drawn
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
-            model = glm::scale(model, glm::vec3(20.0f, .99f, 20.0f));
-            floorEntity.transform = model;
-            scene.entities.emplace_back(floorEntity);
-
-            // Render the cubes, which will set stencil buffer values to 1 where the cubes are drawn
-            model = glm::mat4(1.0f);
-            model = glm::rotate(model, glm::radians(20.0f * currentFrame), glm::vec3(0.0f, 1.0f, 0.0f));
-            cEntity1.transform = model;
-            scene.entities.emplace_back(cEntity1);
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
-            model = glm::rotate(model, glm::radians(-20.0f * currentFrame), glm::vec3(0.0f, 1.0f, 0.0f));
-            cEntity2.transform = model;
-            scene.entities.emplace_back(cEntity2);
-
-            // Render the grass
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(4.0f, 0.0f, 4.0f));
-            grassEntity.transform = model;
-            scene.entities.emplace_back(grassEntity);
-
             renderer.SetShader(shader);
             renderer.Render();
 
-            //rendering skybox last, since we want it to be at the farthest depth
-            glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
-            skyboxShader.use();
-            skyboxShader.setUniformBlock("Matrices", 0);
-            glBindVertexArray(skyboxVAO);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-            glBindVertexArray(0);
-            glDepthFunc(GL_LESS); // set depth function back to default
 
             scene.entities.clear();
 

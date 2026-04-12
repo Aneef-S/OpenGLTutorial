@@ -25,6 +25,11 @@ uniform sampler2D texture_specular1;
 uniform vec3 viewPos;
 uniform samplerCube skybox;
 
+
+in GS_OUT {
+	vec3 color;
+} fs_in;
+
 vec4 CalculateDirectionLight(DirectionLight light,vec3 normal,vec3 viewDirection)
 {
 	vec3 lightDirection = normalize(-light.direction);
@@ -61,14 +66,6 @@ vec4 CalculateDirectionLight(DirectionLight light,vec3 normal,vec3 viewDirection
 
 void main()
 {    
-    // vec3 normal = normalize(Normal);
-    // vec3 viewDirection = normalize(viewPos-FragmentPosition);
-    // vec4 result = CalculateDirectionLight(directionLight[0],normal,viewDirection);
-	// FragColor = result;
-
-	vec3 I = normalize(FragmentPosition - viewPos);
-    vec3 R = reflect(I, normalize(Normal));
-    FragColor = vec4(texture(skybox, R).rgb, 1.0);
-   
+   FragColor = vec4(fs_in.color, 1.0);
 
 }
