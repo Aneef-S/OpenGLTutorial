@@ -5,7 +5,7 @@ out vec4 FragColor;
 uniform sampler2D texture_diffuse1;
 
 
-in GS_OUT {
+in VS_OUT {
 	vec2 TexCoords;
 } fs_in;
 

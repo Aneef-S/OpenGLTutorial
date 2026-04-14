@@ -1,0 +1,43 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "type": "shell",
+      "command": "C:/msys64/mingw64/bin/g++.exe",
+      "args": [
+        "-std=c++17",
+        "-g",
+        "${workspaceFolder}/src/*.cpp",
+        "${workspaceFolder}/src/core/Window.cpp",
+        "${workspaceFolder}/src/input/*.cpp",
+        "${workspaceFolder}/src/renderer/*.cpp",
+        "${workspaceFolder}/src/scene/*.cpp",
+        "${workspaceFolder}/src/glad.c",
+        "-IC:/msys64/mingw64/include",
+        "-I${workspaceFolder}/Linking/include",
+        "-I${workspaceFolder}/src/headers",
+        "-I${workspaceFolder}/src/headers/shapes",
+        "-I${workspaceFolder}/src/headers/utils",
+        "-LC:/msys64/mingw64/lib",
+        "-L${cwd}/Linking/lib/assimp",
+        "-DASSETS_PATH=\"${workspaceFolder}/assets/\"",
+        "-DSHADERS_PATH=\"${workspaceFolder}/src/Shaders/\"",
+        "-o",
+        "${workspaceFolder}/build/main.exe",
+        "-lglfw3",
+        "-lopengl32",
+        "-lgdi32",
+        "-lassimp"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": ["$gcc"],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    }
+  ]
+}
