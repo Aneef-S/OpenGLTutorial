@@ -82,6 +82,8 @@ private:
 
     Scene scene;
 
+    Model backpackModel = Model(ASSETS_PATH "models/backpack/backpack.obj");
+
     Shader shader = Shader(
         SHADERS_PATH "SimpleVertexShader.glsl",
         SHADERS_PATH "SimpleGeometryShader.glsl",
@@ -97,7 +99,7 @@ private:
     unsigned int textureColorBuffer;
     unsigned int rbo; // render buffer object
     unsigned int quadVAO, quadVBO;
-    unsigned int pointsVAO, pointsVBO;
+
 
     unsigned int uboMatrices;
 
@@ -110,16 +112,7 @@ public:
         renderer.SetScene(scene);
         renderer.SetShader(shader);
 
-        // setting up vertex data (and buffer(s)) and configure vertex attributes for the points
-        glGenVertexArrays(1, &pointsVAO);
-        glGenBuffers(1, &pointsVBO);
-        glBindVertexArray(pointsVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, pointsVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
+
         
 
 
@@ -169,6 +162,9 @@ public:
 
         screenShader.use();
         screenShader.setInt("screenTexture", 0);
+
+        shader.use();
+        shader.setUniformBlock("Matrices", 0);
     }
 
     void Run()
@@ -183,12 +179,15 @@ public:
             float deltaTime = currentFrame - lastFrame;
             lastFrame = currentFrame;
 
+            shader.use();
+            shader.setFloat("time", currentFrame);
+
             inputHandler.processKeyInput();
             scene.camera.HandleInput(window.window, deltaTime);
 
             glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
             glEnable(GL_DEPTH_TEST);
-            glClearColor(1.0f,1.0f,1.0f,1.0f);
+            glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             glm::mat4 model = glm::mat4(1.0f);
@@ -198,9 +197,8 @@ public:
             renderer.ResetCameraValues();
             scene.entities.clear();
 
-            shader.use();
-            glBindVertexArray(pointsVAO);
-            glDrawArrays(GL_POINTS, 0, 4);
+            scene.entities.push_back(Entity(backpackModel, model));
+            
 
             glBindBuffer(GL_UNIFORM_BUFFER, uboMatrices);
             glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(scene.camera.GetView()));
@@ -216,7 +214,7 @@ public:
             // rendering from the texture color buffer
             glBindFramebuffer(GL_FRAMEBUFFER,0);
             glDisable(GL_DEPTH_TEST);
-            glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
+            // glClearColor(66.0f/255.0f, 66.0f/255.0f, 66.0f/255.0f, 1.0f); // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
             glClear(GL_COLOR_BUFFER_BIT);
             screenShader.use();
             glBindVertexArray(quadVAO);

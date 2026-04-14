@@ -26,7 +26,7 @@ void Renderer::AddLights()
 void Renderer::ResetCameraValues()
 {
     shader->use();
-    shader->setUniformBlock("Matrices", 0);
+
 }
 
 void Renderer::SetScene(Scene &scene)
